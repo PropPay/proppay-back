@@ -6,9 +6,13 @@ const Locataire = mongoose.model('locataires', {
         unique: true,
         required: [true, "Your Locataire number is required"],
     },
-    locataireFullname: {
+    locataireNom: {
         type: String,
-        required: [true, "Your Locataire fullname is required"],
+        required: [true, "Your Locataire name is required"],
+    },
+    locatairePrenom: {
+        type: String,
+        required: [true, "Your Locataire prename is required"],
     },
     locataireAdress: {
         type: String
