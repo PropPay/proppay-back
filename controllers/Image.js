@@ -15,7 +15,7 @@ console.log(__dirname.substring(0,36));
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'tmp');
+        cb(null, 'uploads');
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname);
