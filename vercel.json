@@ -15,5 +15,8 @@
             "src": "/uploads/(.*)",
             "dest": "/uploads/$1"
         }
-    ]
+    ],
+    "storage": {
+        "ignore": ["/uploads/**"]
+    }
 }

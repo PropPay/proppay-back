@@ -5,7 +5,6 @@ import Image from '../models/Image.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-console.log(__dirname.substring(0,36));
 
 //const uploadDir = path.join(os.tmpdir(), 'uploads');
 
@@ -15,7 +14,7 @@ console.log(__dirname.substring(0,36));
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads');
+        cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname);
