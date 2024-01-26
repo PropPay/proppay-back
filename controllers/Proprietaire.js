@@ -26,7 +26,8 @@ const signupProprietaire = (async (req, res) => {
             bcrypt.hash(req.body.proprietairePassword, 10)
             .then(async hash => {
                 const proprietaire = await new Proprietaire({
-                    proprietaireFullname: req.body.proprietaireFullname,
+                    proprietaireFirstname: req.body.proprietaireFirstname,
+                    proprietaireLastname: req.body.proprietaireLastname,
                     proprietaireNumber: req.body.proprietaireNumber,
                     proprietairePassword: hash,
                 })
@@ -138,10 +139,57 @@ const updateProprietaireNumber = (async (req, res) => {
     }
 })
 
+const ajouterLocataire = (async (req,res) => {
+    try {
+        const number = req.body.locataireNumber
+        const locataire = {
+            locataireFirstname: req.body.locataireFirstname,
+            locataireLastname: req.body.locataireLastname,
+            appartementNumber: req.body.appartementNumber,
+            loyerLocataire: req.body.loyerLocataire,
+            appartementType: req.body.appartementType
+        }
+
+        const proprietaire = await Proprietaire.findOne({proprietaireNumber: req.params.proprietaireNumber});
+        proprietaire.listeLocataire.set(number,locataire)
+        await proprietaire.save();
+
+        res.status(200).json({ message: 'Élément ajouté avec succès' });
+        console.log(proprietaire.listeLocataire);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
+    }
+})
+
+const ajouterPropriete = (async (req,res) => {
+    try {
+        const proprieteId = req.params.proprietaireNumber+'-'+req.body.ProprieteName
+        const propriete = {
+            ProprieteName: req.body.ProprieteName,
+            ProprieteAdress: req.body.ProprieteAdress,
+            ProprieteType: req.body.ProprieteType,
+            ProprieteImages: req.body.ProprieteImages,
+            OccupationPropriete: req.body.OccupationPropriete,
+            PreuveDePropriete: req.body.PreuveDePropriete
+        }
+
+        const proprietaire = await Proprietaire.findOne({proprietaireNumber: req.params.proprietaireNumber});
+        proprietaire.listeLocataire.set(proprieteId,propriete)
+        await proprietaire.save();
+
+        res.status(200).json({ message: 'Élément ajouté avec succès' });
+        console.log(proprietaire.listeLocataire);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
+    }
+})
+
 const deleteProprietaire = (async (req, res) => {
     const proprietaire = await Proprietaire.findOne({ proprietaireNumber: req.params.proprietaireNumber })
     await Proprietaire.deleteOne({ _id: proprietaire._id.toString() }).then(result => res.send(result))
 })
 
-export { confirmProprietairePassword, deleteProprietaire, getProprietaire, getProprietaires, signinProprietaire, signupProprietaire, updateProprietaireNumber, updateProprietairePassword };
+export { ajouterLocataire, confirmProprietairePassword, deleteProprietaire, getProprietaire, getProprietaires, signinProprietaire, signupProprietaire, updateProprietaireNumber, updateProprietairePassword };
 

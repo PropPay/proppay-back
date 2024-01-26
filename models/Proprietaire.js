@@ -6,11 +6,11 @@ const Proprietaire = mongoose.model('proprietaires', {
         unique: true,
         required: [true, "Your Proprietaire number is required"],
     },
-    proprietaireNom: {
+    proprietaireFirstname: {
         type: String,
         required: [true, "Your proprietaire name is required"],
     },
-    proprietairePrenom: {
+    proprietaireLastname: {
         type: String,
         required: [true, "Your proprietaire prename is required"],
     },
@@ -23,6 +23,16 @@ const Proprietaire = mongoose.model('proprietaires', {
     },
     proprietairePassword: {
         type: String
+    },
+    listeLocataire: {
+        type: Map,
+        of:Map,
+        default: {}
+    },
+    listePropriete: {
+        type: Map,
+        of:Map,
+        default: {}
     }
 });
 
