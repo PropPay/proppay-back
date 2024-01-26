@@ -4,6 +4,7 @@ const Image = mongoose.model('images', {
     imagePath: {
         type: String,
     },
+    data: Buffer,
     title: {
         type: String,
     },

@@ -1,5 +1,7 @@
+import fs from "fs";
 import multer from "multer";
 import path, { dirname } from 'path';
+import tmp from "tmp";
 import { fileURLToPath } from 'url';
 import Image from '../models/Image.js';
 
@@ -12,7 +14,7 @@ const __dirname = dirname(__filename);
     fs.mkdirSync(uploadDir);
 } */
 
-const storage = multer.diskStorage({
+/* const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'uploads/');
     },
@@ -21,11 +23,23 @@ const storage = multer.diskStorage({
     }
 });
 
+export const upload = multer({ storage: storage }); */
+
+// Configurations Multer pour le stockage des fichiers temporaires
+const storage = multer.memoryStorage(
+    {
+        destination: function (req, file, cb) {
+            cb(null, 'tmp/uploads');
+        },
+        filename: function (req, file, cb) {
+            cb(null, file.originalname);
+        }
+    });
 export const upload = multer({ storage: storage });
 
 const postImage = (async (req, res) => {
     try {
-        const imagePath = req.file ? req.file.path : null;
+        /* const imagePath = req.file ? req.file.path : null;
         console.log(imagePath);
         if (!imagePath) {
             return res.status(400).send('Aucun fichier image téléchargé.');
@@ -36,9 +50,24 @@ const postImage = (async (req, res) => {
         // Convertissez le chemin d'accès en base 64
         const imagePathBase64 = Buffer.from(imagePath).toString('base64');
         console.log(imagePathBase64);
-        // Enregistrez le chemin d'accès imagePathBase64 et les autres données dans MongoDB
+        // Enregistrez le chemin d'accès imagePathBase64 et les autres données dans MongoDB */
+        const { title, description } = req.body;
+        const tmpFile = tmp.fileSync();
+        fs.writeFileSync(tmpFile.name, req.file.buffer);
+
+        /* const tempDir = await fs.mkdtemp(path.join('/tmp', 'uploads-'));
+        const tempFilePath = path.join(tempDir, req.file.originalname);
+
+        await fs.writeFile(tempFilePath, req.file.buffer); */
+
+        // Faites quelque chose avec le fichier temporaire, par exemple, le stocker en base de données
+
+        // Supprimez le répertoire temporaire après utilisation  await fs.rmdir(tempDir, { recursive: true });
+       
+
         const image = new Image({
-            imagePath: imagePath,
+            imagePath: req.file.originalname,
+            data: req.file.buffer,
             title: title,
             description: description
         });
@@ -61,7 +90,7 @@ const getImage = (async (req, res) => {
         }
 
         // Construisez le chemin absolu en utilisant path.join
-        const absoluteImagePath = path.join(__dirname.substring(0,36), image.imagePath);
+        const absoluteImagePath = path.join(__dirname.substring(0, 36), image.imagePath);
 
         // Envoyez l'image en tant que réponse
         console.log(absoluteImagePath);
