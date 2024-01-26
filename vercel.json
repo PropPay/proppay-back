@@ -5,6 +5,7 @@
             "src": "*.js",
             "use": "@vercel/node"
         }
-    ],
-    "routes": [{ "handle": "@vercel/static" }]
+    ]
+    
 }
+
