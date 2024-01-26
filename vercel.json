@@ -6,17 +6,5 @@
             "use": "@vercel/node"
         }
     ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "/index.js"
-        },
-        {
-            "src": "/uploads/(.*)",
-            "dest": "/uploads/$1"
-        }
-    ],
-    "storage": {
-        "ignore": ["/uploads/**"]
-    }
+    "routes": [{ "handle": "@vercel/static" }]
 }
