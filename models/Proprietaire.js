@@ -30,9 +30,8 @@ const Proprietaire = mongoose.model('proprietaires', {
         default: {}
     },
     listePropriete: {
-        type: Map,
-        of:Map,
-        default: {}
+        type: [String],
+        default: []
     }
 });
 

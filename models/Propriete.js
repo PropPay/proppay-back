@@ -14,14 +14,16 @@ const Propriete = mongoose.model('proprietes', {
         required: [true, "The Propriety type is required"],
     },
     ProprieteImages: {
-        type: String
+        imagePath: String,
+        data: Buffer,
     },
     OccupationPropriete: {
         type: Boolean,
         required: [true, "'Is a propriety' occupied is requiried"]
     },
     PreuveDePropriete: {
-        type: String
+        pdfPath: String,
+        data: Buffer,
     }
 });
 

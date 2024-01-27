@@ -1,10 +1,18 @@
 import mongoose from "mongoose";
 
 const Image = mongoose.model('images', {
-    imagePath: {
-        type: String,
+    image: {
+        imagePath: {
+            type: String,
+        },
+        data: Buffer,
     },
-    data: Buffer,
+    pdf: {
+        pdfPath: {
+            type: String,
+        },
+        data: Buffer,
+    },
     title: {
         type: String,
     },
@@ -13,4 +21,4 @@ const Image = mongoose.model('images', {
     },
 });
 
-export default Image ;
+export default Image;

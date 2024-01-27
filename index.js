@@ -4,9 +4,9 @@ import bodyParser from "body-parser";
 import dotenv from 'dotenv';
 import express from "express";
 import connectDb from "./database/db.js";
-import routerImage from "./routes/Image.js";
 import routerLocataire from "./routes/Locataire.js";
 import routerProprietaire from "./routes/Proprietaire.js";
+import routerPropriete from "./routes/Propriete.js";
 
 const app = express();
 
@@ -26,6 +26,6 @@ connectDb();
 
 app.use('/users/locataires', routerLocataire)
 app.use('/users/proprietaires', routerProprietaire)
-app.use('/', routerImage)
+app.use('/', routerPropriete)
 
 
