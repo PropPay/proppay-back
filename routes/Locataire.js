@@ -1,27 +1,27 @@
 import express from 'express';
-const routerLocataire = express.Router()
+const routerTenant = express.Router()
 
 import {
-    confirmLocatairePassword,
-    deleteLocataire,
-    getLocataire,
-    getLocataires,
-    signinLocataire,
-    signupLocataire,
-    updateLocataireNumber,
-    updateLocatairePassword
+    confirmTenantPassword,
+    deleteTenant,
+    getTenant,
+    getTenants,
+    signinTenant,
+    signupTenant,
+    updateTenantNumber,
+    updateTenantPassword
 } from '../controllers/Locataire.js';
 
 
-routerLocataire.get('/', getLocataires)
-routerLocataire.get('/:locataireNumber', getLocataire)
+routerTenant.get('/', getTenants)
+routerTenant.get('/:tenantNumber', getTenant)
 
-routerLocataire.post('/signup', signupLocataire)
-routerLocataire.post('/signin', signinLocataire)
-routerLocataire.post('/confirm/password/:locataireNumber', confirmLocatairePassword)
+routerTenant.post('/signup', signupTenant)
+routerTenant.post('/signin', signinTenant)
+routerTenant.post('/confirm/password/:tenantNumber', confirmTenantPassword)
 
-routerLocataire.put('/:_id', updateLocataireNumber)
-routerLocataire.put(('/update-password/:locataireNumber'), updateLocatairePassword)
-routerLocataire.delete('/:locataireNumber', deleteLocataire)
+routerTenant.put('/:_id', updateTenantNumber)
+routerTenant.put(('/update-password/:tenantNumber'), updateTenantPassword)
+routerTenant.delete('/:tenantNumber', deleteTenant)
 
-export default routerLocataire
+export default routerTenant

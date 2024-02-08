@@ -1,13 +1,13 @@
 import bcrypt from 'bcrypt';
-import Locataire from '../models/Locataire.js';
+import Tenant from '../models/Locataire.js';
 
 
-const getLocataires = ((req, res) => {
-    Locataire.find({}).then(item => res.send(item))
+const getTenants = ((req, res) => {
+    Tenant.find({}).then(item => res.send(item))
 })
 
-const getLocataire = (async (req, res) => {
-    await Locataire.findOne({ locataireNumber: req.params.locataireNumber }).then(
+const getTenant = (async (req, res) => {
+    await Tenant.findOne({ tenantNumber: req.params.tenantNumber }).then(
         item => {
             if (!item) {
                 res.send("user doesn't exit")
@@ -16,27 +16,28 @@ const getLocataire = (async (req, res) => {
         })
 })
 
-const signupLocataire = (async (req, res) => {
+const signupTenant = (async (req, res) => {
     try {
-        const number = await Locataire.findOne({ locataireNumber: req.body.locataireNumber });
+        const number = await Tenant.findOne({ tenantNumber: req.body.tenantNumber });
         if (number) {
             return res.json({ message: "User already exists" });
         }
-        if (req.body.locatairePassword === req.body.locatairePasswordC) {
-            bcrypt.hash(req.body.locatairePassword, 10)
+        if (req.body.tenantPassword === req.body.tenantPasswordC) {
+            bcrypt.hash(req.body.tenantPassword, 10)
             .then(async hash => {
-                const locataire = await new Locataire({
-                    locataireFullname: req.body.locataireFullname,
-                    locataireNumber: req.body.locataireNumber,
-                    locatairePassword: hash,
+                const tenant = await new Tenant({
+                    tenantFirstName: req.body.tenantFirstName,
+                    tenantLastName: req.body.tenantLastName,
+                    tenantNumber: req.body.TenantNumber,
+                    tenantPassword: hash,
                 })
-                await locataire.save()
+                await tenant.save()
                     .then(() => res.status(201).json({
                         message: 'user enregistré !',
-                        data: locataire
+                        data: tenant
                     }))
                     .catch(error => res.status(400).json({ error }));
-                console.log(locataire);
+                console.log(tenant);
             })
             .catch(error => res.status(500).json({ error }))
         }
@@ -45,16 +46,16 @@ const signupLocataire = (async (req, res) => {
     }
 })
 
-const signinLocataire = (async (req, res) => {
-    await Locataire.findOne({ locataireNumber: req.body.locataireNumber }).then(
-        locataire => {
-            if (locataire == null) {
+const signinTenant = (async (req, res) => {
+    await Tenant.findOne({ tenantNumber: req.body.tenantNumber }).then(
+        tenant => {
+            if (tenant == null) {
                 res.status(500).json({
                     status: "500",
                     message: 'user et / ou mot de passe incorrect'
                 })
             } else {
-                bcrypt.compare(req.body.locatairePassword, locataire.locatairePassword)
+                bcrypt.compare(req.body.tenantPassword, tenant.TenantPassword)
                     .then(valid => {
                         console.log('valid');
                         if (valid == false) {
@@ -65,7 +66,7 @@ const signinLocataire = (async (req, res) => {
                         } else {
                             return res.status(201).json({
                                 status: "201",
-                                data: locataire,
+                                data: tenant,
                                 message: 'connected'
                             })
                         }
@@ -75,15 +76,15 @@ const signinLocataire = (async (req, res) => {
         })
 })
 
-const confirmLocatairePassword = (async (req,res) => {
+const confirmTenantPassword = (async (req,res) => {
     try {
-        await Locataire.findOne({ locataireNumber : req.params.locataireNumber })
+        await Tenant.findOne({ tenantNumber : req.params.tenantNumber })
             .then(
                 async user => {
                     if (!user) {
                         return res.status(500).json({ message: "user n'existe pas" })
                     }
-                    const valid = await bcrypt.compare(req.body.locatairePassword, user.locatairePassword)
+                    const valid = await bcrypt.compare(req.body.tenantPassword, user.tenantPassword)
                     if (!valid) {
                         return res.status(500).json({ message: 'mot de passe incorrect' })
                     }
@@ -97,20 +98,20 @@ const confirmLocatairePassword = (async (req,res) => {
 })
 
 
-const updateLocatairePassword = (async (req,res) => {
+const updateTenantPassword = (async (req,res) => {
     try {
-        await Locataire.findOne({ locataireNumber : req.params.locataireNumber })
+        await Tenant.findOne({ tenantNumber : req.params.tenantNumber })
             .then(
                 async user => {
                     if (!user) {
                         return res.status(500).json({ message: "user n'existe pas" })
                     }
-                    if (req.body.locatairePassword !== req.body.locatairePasswordC) {
+                    if (req.body.tenantPassword !== req.body.tenantPasswordC) {
                         return res.status(500).json({ message: 'entrez le même mot de passe' })
                     }
-                    await bcrypt.hash(req.body.locatairePassword, 10)
+                    await bcrypt.hash(req.body.tenantPassword, 10)
                         .then(hash_new => {
-                            user.locatairePassword = hash_new
+                            user.tenantPassword = hash_new
                             user.save();
                             res.send(user)
                         })
@@ -122,14 +123,14 @@ const updateLocatairePassword = (async (req,res) => {
     }
 })
 
-const updateLocataireNumber = (async (req, res) => {
+const updateTenantNumber = (async (req, res) => {
     try {
-        await Locataire.findOne({ _id: req.params._id })
+        await Tenant.findOne({ _id: req.params._id })
             .then(
-                Locataire => {
-                    locataire.locataireNumber = req.body.locataireNumber;
-                    Locataire.save();
-                    res.send(locataire)
+                tenant => {
+                    tenant.tenantNumber = req.body.tenantNumber;
+                    tenant.save();
+                    res.send(tenant)
                 }
             )
             .catch(error => console.log(error))
@@ -138,10 +139,10 @@ const updateLocataireNumber = (async (req, res) => {
     }
 })
 
-const deleteLocataire = (async (req, res) => {
-    const Locataire = await Locataire.findOne({ LocataireNumber: req.params.LocataireNumber })
-    await Locataire.deleteOne({ _id: Locataire._id.toString() }).then(result => res.send(result))
+const deleteTenant = (async (req, res) => {
+    const tenant = await Tenant.findOne({ tenantNumber: req.params.tenantNumber })
+    await Tenant.deleteOne({ _id: tenant._id.toString() }).then(result => res.send(result))
 })
 
-export { confirmLocatairePassword, deleteLocataire, getLocataire, getLocataires, signinLocataire, signupLocataire, updateLocataireNumber, updateLocatairePassword };
+export { confirmTenantPassword, deleteTenant, getTenant, getTenants, signinTenant, signupTenant, updateTenantNumber, updateTenantPassword };
 

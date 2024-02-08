@@ -4,9 +4,9 @@ import bodyParser from "body-parser";
 import dotenv from 'dotenv';
 import express from "express";
 import connectDb from "./database/db.js";
-import routerLocataire from "./routes/Locataire.js";
-import routerProprietaire from "./routes/Proprietaire.js";
-import routerPropriete from "./routes/Propriete.js";
+import routerNotification from "./routes/Notification.js";
+import { default as routerLandlord, default as routerTenant } from "./routes/Proprietaire.js";
+import routerPropriety from "./routes/Propriete.js";
 
 const app = express();
 
@@ -24,8 +24,9 @@ app.listen(3000, (err) => {
 dotenv.config({ path: './config/.env' })
 connectDb();
 
-app.use('/users/locataires', routerLocataire)
-app.use('/users/proprietaires', routerProprietaire)
-app.use('/', routerPropriete)
+app.use('/users/tenants', routerTenant)
+app.use('/users/landlords', routerLandlord)
+app.use('/proprieties', routerPropriety)
+app.use('/notifications', routerNotification)
 
 

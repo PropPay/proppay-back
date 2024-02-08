@@ -1,30 +1,30 @@
 import mongoose from "mongoose";
 
-const Propriete = mongoose.model('proprietes', {
-    ProprieteName: {
+const Propriety = mongoose.model('proprietes', {
+    proprietyName: {
         type: String,
         required: [true, "The Propriety fullname is required"],
     },
-    ProprieteAdress: {
+    proprietyAdress: {
         type: String,
         required: [true, "The Propriety adress is required"],
     },
-    ProprieteType: {
+    proprietyType: {
         type: String,
         required: [true, "The Propriety type is required"],
     },
-    ProprieteImages: {
+    proprietyImages: {
         imagePath: String,
         data: Buffer,
     },
-    OccupationPropriete: {
+    proprietyOccupation: {
         type: Boolean,
         required: [true, "'Is a propriety' occupied is requiried"]
     },
-    PreuveDePropriete: {
+    proofOfPropriety: {
         pdfPath: String,
         data: Buffer,
     }
 });
 
-export default Propriete ;
+export default Propriety ;

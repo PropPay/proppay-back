@@ -1,38 +1,42 @@
 import mongoose from "mongoose";
 
-const Proprietaire = mongoose.model('proprietaires', {
-    proprietaireNumber: {
+const Landlord = mongoose.model('landlords', {
+    landlordNumber: {
         type: String,
         unique: true,
-        required: [true, "Your Proprietaire number is required"],
+        required: [true, "Your landlord number is required"],
     },
-    proprietaireFirstname: {
+    landlordFirstname: {
         type: String,
-        required: [true, "Your proprietaire name is required"],
+        required: [true, "Your landlord name is required"],
     },
-    proprietaireLastname: {
+    landlordLastname: {
         type: String,
-        required: [true, "Your proprietaire prename is required"],
+        required: [true, "Your landlord prename is required"],
     },
-    proprietaireAdress: {
+    landlordAdress: {
         type: String
     },
-    urlImage: {
-        type: String,
-        default: ''
+    profilImage: {
+        imagePath: String,
+        data: Buffer,
     },
-    proprietairePassword: {
+    landlordPassword: {
         type: String
     },
-    listeLocataire: {
+    identityCard : {
+        pdfPath: String,
+        data: Buffer
+    },
+    listOfTenants: {
         type: Map,
         of:Map,
         default: {}
     },
-    listePropriete: {
+    listOfProprieties: {
         type: [String],
         default: []
     }
 });
 
-export default Proprietaire ;
+export default Landlord ;

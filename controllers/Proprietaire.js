@@ -1,90 +1,65 @@
 import bcrypt from 'bcrypt';
-import Proprietaire from '../models/Proprietaire.js';
+import fs from "fs";
+import tmp from "tmp";
+import Landlord from '../models/Proprietaire.js';
 
 
-const getProprietaires = ((req, res) => {
-    Proprietaire.find({}).then(item => res.send(item))
-})
-
-const getProprietaire = (async (req, res) => {
-    await Proprietaire.findOne({ proprietaireNumber: req.params.proprietaireNumber }).then(
-        item => {
-            if (!item) {
-                res.send("user doesn't exit")
-            }
-            res.send(item);
-        })
-})
-
-const signupProprietaire = (async (req, res) => {
+const addTenant = (async (req,res) => {
     try {
-        const number = await Proprietaire.findOne({ proprietaireNumber: req.body.proprietaireNumber });
-        if (number) {
-            return res.json({ message: "User already exists" });
+        const number = req.body.tenantNumber
+        const locataire = {
+            tenantFirstname: req.body.tenantFirstname,
+            tenantLastname: req.body.tenantLastname,
+            appartementNumber: req.body.appartementNumber,
+            tenantRent: req.body.tenantRent,
+            appartementType: req.body.appartementType
         }
-        if (req.body.proprietairePassword === req.body.proprietairePasswordC) {
-            bcrypt.hash(req.body.proprietairePassword, 10)
-            .then(async hash => {
-                const proprietaire = await new Proprietaire({
-                    proprietaireFirstname: req.body.proprietaireFirstname,
-                    proprietaireLastname: req.body.proprietaireLastname,
-                    proprietaireNumber: req.body.proprietaireNumber,
-                    proprietairePassword: hash,
-                })
-                await proprietaire.save()
-                    .then(() => res.status(201).json({
-                        message: 'user enregistré !',
-                        data: proprietaire
-                    }))
-                    .catch(error => res.status(400).json({ error }));
-                console.log(proprietaire);
-            })
-            .catch(error => res.status(500).json({ error }))
-        }
+
+        const landlord = await Landlord.findOne({landlordNumber: req.params.landlordNumber});
+        landlord.listOfTenants.set(number,locataire)
+        await landlord.save();
+
+        res.status(200).json({ message: 'Élément ajouté avec succès' });
+        console.log(landlord.listOfTenants);
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
     }
 })
 
-const signinProprietaire = (async (req, res) => {
-    await Proprietaire.findOne({ proprietaireNumber: req.body.proprietaireNumber }).then(
-        proprietaire => {
-            if (proprietaire == null) {
-                res.status(500).json({
-                    status: "500",
-                    message: 'user et / ou mot de passe incorrect'
-                })
-            } else {
-                bcrypt.compare(req.body.proprietairePassword, proprietaire.proprietairePassword)
-                    .then(valid => {
-                        console.log('valid');
-                        if (valid == false) {
-                            res.status(400).json({
-                                status: "400",
-                                message: 'user et / ou mot de passe incorrect'
-                            })
-                        } else {
-                            return res.status(201).json({
-                                status: "201",
-                                data: proprietaire,
-                                message: 'connected'
-                            })
-                        }
-                    })
-                    .catch(error => res.json({ error }))
-            }
-        })
+const ajouterPropriete = (async (req,res) => {
+    try {
+        const proprietyId = req.params.LandlordNumber+'-'+req.body.ProprieteName
+        const propriety = {
+            ProprietyName: req.body.ProprietyName,
+            ProprietyAdress: req.body.ProprietyAdress,
+            ProprietyType: req.body.ProprietyType,
+            ProprietyImages: req.body.ProprietyImages,
+            proprietyOccupation: req.body.proprietyOccupation,
+            proofOfPropriety: req.body.proofOfPropriety
+        }
+
+        const landlord = await Landlord.findOne({landlordNumber: req.params.landlordNumber});
+        landlord.listeLocataire.set(proprietyId,propriety)
+        await landlord.save();
+
+        res.status(200).json({ message: 'Élément ajouté avec succès' });
+        console.log(landlord.listeLocataire);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
+    }
 })
 
-const confirmProprietairePassword = (async (req,res) => {
+const confirmLandlordPassword = (async (req,res) => {
     try {
-        await Proprietaire.findOne({ proprietaireNumber : req.params.proprietaireNumber })
+        await Landlord.findOne({ landlordNumber : req.params.landlordNumber })
             .then(
                 async user => {
                     if (!user) {
                         return res.status(500).json({ message: "user n'existe pas" })
                     }
-                    const valid = await bcrypt.compare(req.body.proprietairePassword, user.proprietairePassword)
+                    const valid = await bcrypt.compare(req.body.landlordPassword, user.landlordPassword)
                     if (!valid) {
                         return res.status(500).json({ message: 'mot de passe incorrect' })
                     }
@@ -97,21 +72,88 @@ const confirmProprietairePassword = (async (req,res) => {
     }
 })
 
+const deleteLandlord = (async (req, res) => {
+    const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber })
+    await Landlord.deleteOne({ _id: landlord._id.toString() }).then(result => res.send(result))
+})
 
-const updateProprietairePassword = (async (req,res) => {
+const getLandlords = ((req, res) => {
+    Landlord.find({}).then(item => res.send(item))
+})
+
+const getLandlord = (async (req, res) => {
+    await Landlord.findOne({ landlordNumber: req.params.landlordNumber }).then(
+        item => {
+            if (!item) {
+                res.send("user doesn't exit")
+            }
+            res.send(item);
+        })
+})
+
+const updateProfil = (async (req,res) => {
     try {
-        await Proprietaire.findOne({ proprietaireNumber : req.params.proprietaireNumber })
+        const tmpFile = tmp.fileSync();
+        fs.writeFileSync(tmpFile.name, req.file.buffer);
+
+        await Landlord.findOne({ landlordNumber : req.params.landlordNumber })
+            .then( async user => {
+                if (!user) {
+                    return res.status(500).json({ message: "user n'existe pas" })
+                }
+                user.landlordFirstname = req.body.landlordFirstname,
+                user.landlordLastname = req.body.landlordLastname,
+                user.landlordAdress = req.body.landlordAdress,
+                user.identityCard = {
+                    pdfPath: req.file.originalname,
+                    data: req.file.buffer
+                }
+                await user.save();
+                res.send(user)
+            }
+            )
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+const updateProfilImage = (async (req, res) => {
+    try {
+        const tmpFile = tmp.fileSync();
+        fs.writeFileSync(tmpFile.name, req.file.buffer);
+
+        await Landlord.findOne({ landlordNumber : req.params.landlordNumber })
+            .then( async user => {
+                if (!user) {
+                    return res.status(500).json({ message: "user n'existe pas" })
+                }
+                user.profilImage = {
+                    imagePath: req.file.originalname,
+                    data: req.file.buffer,
+                }
+                await user.save();
+                res.send(user)
+            }
+            )
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+const updateLandlordPassword = (async (req,res) => {
+    try {
+        await Landlord.findOne({ landlordNumber : req.params.landlordNumber })
             .then(
                 async user => {
                     if (!user) {
                         return res.status(500).json({ message: "user n'existe pas" })
                     }
-                    if (req.body.proprietairePassword !== req.body.proprietairePasswordC) {
+                    if (req.body.landlordPassword !== req.body.landlordPasswordC) {
                         return res.status(500).json({ message: 'entrez le même mot de passe' })
                     }
-                    await bcrypt.hash(req.body.proprietairePassword, 10)
+                    await bcrypt.hash(req.body.landlordPassword, 10)
                         .then(hash_new => {
-                            user.proprietairePassword = hash_new
+                            user.landlordPassword = hash_new
                             user.save();
                             res.send(user)
                         })
@@ -123,14 +165,14 @@ const updateProprietairePassword = (async (req,res) => {
     }
 })
 
-const updateProprietaireNumber = (async (req, res) => {
+const updateLandlordNumber = (async (req, res) => {
     try {
-        await Proprietaire.findOne({ _id: req.params._id })
+        await Landlord.findOne({ _id: req.params._id })
             .then(
-                proprietaire => {
-                    proprietaire.ProprietaireNumber = req.body.proprietaireNumber;
-                    proprietaire.save();
-                    res.send(proprietaire)
+                landlord => {
+                    landlord.LandlordNumber = req.body.landlordNumber;
+                    landlord.save();
+                    res.send(landlord)
                 }
             )
             .catch(error => console.log(error))
@@ -139,57 +181,65 @@ const updateProprietaireNumber = (async (req, res) => {
     }
 })
 
-const ajouterLocataire = (async (req,res) => {
+const signupLandlord = (async (req, res) => {
     try {
-        const number = req.body.locataireNumber
-        const locataire = {
-            locataireFirstname: req.body.locataireFirstname,
-            locataireLastname: req.body.locataireLastname,
-            appartementNumber: req.body.appartementNumber,
-            loyerLocataire: req.body.loyerLocataire,
-            appartementType: req.body.appartementType
+        const number = await Landlord.findOne({ landlordNumber: req.body.landlordNumber });
+        if (number) {
+            return res.json({ message: "User already exists" });
         }
-
-        const proprietaire = await Proprietaire.findOne({proprietaireNumber: req.params.proprietaireNumber});
-        proprietaire.listeLocataire.set(number,locataire)
-        await proprietaire.save();
-
-        res.status(200).json({ message: 'Élément ajouté avec succès' });
-        console.log(proprietaire.listeLocataire);
+        if (req.body.landlordPassword === req.body.landlordPasswordC) {
+            bcrypt.hash(req.body.landlordPassword, 10)
+            .then(async hash => {
+                const landlord = await new Landlord({
+                    landlordFirstname: req.body.landlordFirstname,
+                    landlordLastname: req.body.landlordLastname,
+                    landlordNumber: req.body.landlordNumber,
+                    landlordPassword: hash,
+                })
+                await landlord.save()
+                    .then(() => res.status(201).json({
+                        message: 'user enregistré !',
+                        data: landlord
+                    }))
+                    .catch(error => res.status(400).json({ error }));
+                console.log(landlord);
+            })
+            .catch(error => res.status(500).json({ error }))
+        }
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
+        console.log(error);
     }
 })
 
-const ajouterPropriete = (async (req,res) => {
-    try {
-        const proprieteId = req.params.proprietaireNumber+'-'+req.body.ProprieteName
-        const propriete = {
-            ProprieteName: req.body.ProprieteName,
-            ProprieteAdress: req.body.ProprieteAdress,
-            ProprieteType: req.body.ProprieteType,
-            ProprieteImages: req.body.ProprieteImages,
-            OccupationPropriete: req.body.OccupationPropriete,
-            PreuveDePropriete: req.body.PreuveDePropriete
-        }
-
-        const proprietaire = await Proprietaire.findOne({proprietaireNumber: req.params.proprietaireNumber});
-        proprietaire.listeLocataire.set(proprieteId,propriete)
-        await proprietaire.save();
-
-        res.status(200).json({ message: 'Élément ajouté avec succès' });
-        console.log(proprietaire.listeLocataire);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
-    }
+const signinLandlord = (async (req, res) => {
+    await Landlord.findOne({ landlordNumber: req.body.landlordNumber }).then(
+        landlord => {
+            if (landlord == null) {
+                res.status(500).json({
+                    status: "500",
+                    message: 'user et / ou mot de passe incorrect'
+                })
+            } else {
+                bcrypt.compare(req.body.landlordPassword, landlord.landlordPassword)
+                    .then(valid => {
+                        console.log('valid');
+                        if (valid == false) {
+                            res.status(400).json({
+                                status: "400",
+                                message: 'user et / ou mot de passe incorrect'
+                            })
+                        } else {
+                            return res.status(201).json({
+                                status: "201",
+                                data: landlord,
+                                message: 'connected'
+                            })
+                        }
+                    })
+                    .catch(error => res.json({ error }))
+            }
+        })
 })
 
-const deleteProprietaire = (async (req, res) => {
-    const proprietaire = await Proprietaire.findOne({ proprietaireNumber: req.params.proprietaireNumber })
-    await Proprietaire.deleteOne({ _id: proprietaire._id.toString() }).then(result => res.send(result))
-})
-
-export { ajouterLocataire, confirmProprietairePassword, deleteProprietaire, getProprietaire, getProprietaires, signinProprietaire, signupProprietaire, updateProprietaireNumber, updateProprietairePassword };
+export { addTenant, confirmLandlordPassword, deleteLandlord, getLandlord, getLandlords, signinLandlord, signupLandlord, updateLandlordNumber, updateLandlordPassword, updateProfil, updateProfilImage };
 

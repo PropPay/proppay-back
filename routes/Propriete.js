@@ -1,13 +1,13 @@
 import express from 'express';
-import { addPropriete, upload } from '../controllers/Propriete.js';
-const routerPropriete = express.Router()
+import { addPropriety, upload } from '../controllers/Propriete.js';
+const routerPropriety = express.Router()
 
 
 
-routerPropriete.post('/upload/:proprietaireNumber', upload.fields([
-    { name: 'ProprieteImages', maxCount: 1 },
-    { name: 'PreuveDePropriete', maxCount: 1 }]), addPropriete)
+routerPropriety.post('/add/:landlordNumber', upload.fields([
+    { name: 'proprietyImages', maxCount: 1 },
+    { name: 'proofOfPropriety', maxCount: 1 }]), addPropriety)
 /* routerImage.get('/upload/:id',getImage) */
 
 
-export default routerPropriete
+export default routerPropriety

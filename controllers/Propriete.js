@@ -1,8 +1,8 @@
 import fs from "fs";
 import multer from "multer";
 import tmp from "tmp";
-import Proprietaire from "../models/Proprietaire.js";
-import Propriete from "../models/Propriete.js";
+import Landlord from "../models/Proprietaire.js";
+import Propriety from "../models/Propriete.js";
 
 
 // Configurations Multer pour le stockage des fichiers temporaires
@@ -18,49 +18,49 @@ const storage = multer.memoryStorage(
 
 export const upload = multer({ storage: storage });
 
-const addPropriete = (async (req, res) => {
+const addPropriety = (async (req, res) => {
     try {
 
-        const imageFile = req.files['ProprieteImages'][0];
-        const pdfFile = req.files['PreuveDePropriete'][0];
+        const imageFile = req.files['proprietyImages'][0];
+        const pdfFile = req.files['proofOfPropriety'][0];
 
         const tmpFile = tmp.fileSync();
         fs.writeFileSync(tmpFile.name, imageFile.buffer);
         fs.writeFileSync(tmpFile.name, pdfFile.buffer);
         
         // Ajouter la propriété dans la base de données 'propriétés
-        const propriete = await new Propriete({
-            ProprieteName: req.params.proprietaireNumber + '-' +req.body.ProprieteName,
-            ProprieteAdress: req.body.ProprieteAdress,
-            ProprieteType: req.body.ProprieteType,
-            ProprieteImages: {
+        const propriety = await new Propriety({
+            proprietyName: req.params.proprietaireNumber + '-' +req.body.proprietyName,
+            proprietyAdress: req.body.proprietyAdress,
+            proprietyType: req.body.proprietyType,
+            proprietyImages: {
                 imagePath: imageFile.originalname,
                 data: imageFile.buffer,
             },
-            OccupationPropriete: req.body.OccupationPropriete,
-            PreuveDePropriete: {
+            proprietyOccupation: req.body.proprietyOccupation,
+            proofOfPropriety: {
                 pdfPath: pdfFile.originalname,
                 data: pdfFile.buffer,
             }
         })
-        await propriete.save()
+        await propriety.save()
 
-        // Ajouter la propriété dans le champ 'listePropriete' du locataire
+        // Ajouter la propriété dans le champ 'listepropriety' du locataire
         
-            /* const proprieteValeur = {
-                ProprieteName: req.body.ProprieteName,
-                ProprieteAdress: req.body.ProprieteAdress,
-                ProprieteType: req.body.ProprieteType,
-                ProprieteImages: req.body.ProprieteImages,
-                OccupationPropriete: req.body.OccupationPropriete,
-                PreuveDePropriete: req.body.PreuveDePropriete
+            /* const proprietyValeur = {
+                proprietyName: req.body.proprietyName,
+                proprietyAdress: req.body.proprietyAdress,
+                proprietyType: req.body.proprietyType,
+                proprietyImages: req.body.proprietyImages,
+                proprietyOccupation: req.body.proprietyOccupation,
+                PreuveDepropriety: req.body.PreuveDepropriety
             } */
 
-        const proprieteId = req.params.proprietaireNumber + '-' + req.body.ProprieteName
+        const proprietyId = req.params.proprietaireNumber + '-' + req.body.proprietyName
 
-        const proprietaire = await Proprietaire.findOne({ proprietaireNumber: req.params.proprietaireNumber });
-        proprietaire.listePropriete.push(proprieteId)
-        await proprietaire.save();
+        const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
+        landlord.listOfProprieties.push(proprietyId)
+        await landlord.save();
 
         res.status(200).json({ message: 'Élément ajouté avec succès' });
     } catch (error) {
@@ -69,18 +69,18 @@ const addPropriete = (async (req, res) => {
     }
 })
 
-const getProprietes = (async (req, res) => {
-    await Propriete.find({}).then(item => res.send(item))
+const getProprieties = (async (req, res) => {
+    await propriety.find({}).then(item => res.send(item))
 })
 
-const getPropriete = (async (req, res) => {
-    await Propriete.findOne({ _id: req.params.id }).then(item => res.send(item))
+const getPropriety = (async (req, res) => {
+    await propriety.findOne({ _id: req.params.id }).then(item => res.send(item))
 })
 
-const deletePropriete = (async (req, res) => {
-    const propriete = await Propriete.findOne({ _id: req.params.id })
-    await propriete.deleteOne({ _id: propriete._id.toString() }).then(result => res.send(result))
+const deletePropriety = (async (req, res) => {
+    const propriety = await propriety.findOne({ _id: req.params.id })
+    await propriety.deleteOne({ _id: propriety._id.toString() }).then(result => res.send(result))
 })
 
-export { addPropriete, deletePropriete, getPropriete, getProprietes };
+export { addPropriety, deletePropriety, getProprieties, getPropriety };
 

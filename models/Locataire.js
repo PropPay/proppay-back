@@ -1,29 +1,29 @@
 import mongoose from "mongoose";
 
-const Locataire = mongoose.model('locataires', {
-    locataireNumber: {
+const Tenant = mongoose.model('tenants', {
+    tenantNumber: {
         type: String,
         unique: true,
-        required: [true, "Your Locataire number is required"],
+        required: [true, "Your tenant number is required"],
     },
-    locataireNom: {
+    tenantFirstName: {
         type: String,
-        required: [true, "Your Locataire name is required"],
+        required: [true, "Your tenant name is required"],
     },
-    locatairePrenom: {
+    tenantLastName: {
         type: String,
-        required: [true, "Your Locataire prename is required"],
+        required: [true, "Your tenant prename is required"],
     },
-    locataireAdress: {
+    tenantAdress: {
         type: String
     },
     urlImage: {
         type: String,
         default: ''
     },
-    locatairePassword: {
+    tenantPassword: {
         type: String
     }
 });
 
-export default Locataire ;
+export default Tenant ;
