@@ -6,7 +6,10 @@ import {
     confirmLandlordPassword,
     deleteLandlord,
     getLandlord,
+    getLandlordProprietiesImages,
+    getLandlordProprietiesInfo,
     getLandlords,
+    getPhotoProfil,
     signinLandlord,
     signupLandlord,
     updateLandlordNumber,
@@ -15,21 +18,26 @@ import {
     updateProfilImage
 } from '../controllers/Proprietaire.js';
 import { upload } from '../controllers/Propriete.js';
+import { authMiddleware } from '../controllers/middleware/authMiddleware.js';
 
 
-routerLandlord.get('/', getLandlords)
-routerLandlord.get('/:landlordNumber', getLandlord)
+routerLandlord.get('/',authMiddleware, getLandlords)
+routerLandlord.get('/:landlordNumber',authMiddleware, getLandlord)
+routerLandlord.get('/photo-profil/:landlordNumber', getPhotoProfil)
+routerLandlord.get('/proprieties/infos/:landlordNumber', getLandlordProprietiesInfo)
+routerLandlord.get('/proprieties/image/:landlordNumber', getLandlordProprietiesImages)
+
 
 routerLandlord.post('/signup', signupLandlord)
 routerLandlord.post('/signin', signinLandlord)
-routerLandlord.post('/confirm/password/:landlordNumber', confirmLandlordPassword)
+routerLandlord.post('/confirm/password/:landlordNumber',authMiddleware, confirmLandlordPassword)
 
-routerLandlord.put('/add-tenant/:landlordNumber', addTenant)
-routerLandlord.put('/:_id', updateLandlordNumber)
-routerLandlord.put(('/update-password/:landlordNumber'), updateLandlordPassword)
-routerLandlord.put(('/update-profil/:landlordNumber'),upload.single('identity'), updateProfil)
-routerLandlord.put(('/photo-profil/:landlordNumber'), upload.single('profile'), updateProfilImage)
+routerLandlord.put('/add-tenant/:landlordNumber',authMiddleware, addTenant)
+routerLandlord.put('/:_id',authMiddleware, updateLandlordNumber)
+routerLandlord.put(('/update-password/:landlordNumber'),authMiddleware, updateLandlordPassword)
+routerLandlord.put(('/update-profil/:landlordNumber'),upload.single('identity'),authMiddleware, updateProfil)
+routerLandlord.put(('/photo-profil/:landlordNumber'), upload.single('profile'),authMiddleware, updateProfilImage)
 
-routerLandlord.delete('/:landlordNumber', deleteLandlord)
+routerLandlord.delete('/:landlordNumber',authMiddleware, deleteLandlord)
 
 export default routerLandlord

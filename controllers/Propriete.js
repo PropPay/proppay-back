@@ -29,8 +29,9 @@ const addPropriety = (async (req, res) => {
         fs.writeFileSync(tmpFile.name, pdfFile.buffer);
         
         // Ajouter la propriété dans la base de données 'propriétés
-        const propriety = await new Propriety({
-            proprietyName: req.params.proprietaireNumber + '-' +req.body.proprietyName,
+        const propriety = await new Propriety({ 
+            proprietyId: req.params.landlordNumber + '-' +req.body.proprietyName,
+            proprietyName: req.body.proprietyName,
             proprietyAdress: req.body.proprietyAdress,
             proprietyType: req.body.proprietyType,
             proprietyImages: {
@@ -56,7 +57,7 @@ const addPropriety = (async (req, res) => {
                 PreuveDepropriety: req.body.PreuveDepropriety
             } */
 
-        const proprietyId = req.params.proprietaireNumber + '-' + req.body.proprietyName
+        const proprietyId = req.params.landlordNumber + '-' + req.body.proprietyName
 
         const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
         landlord.listOfProprieties.push(proprietyId)

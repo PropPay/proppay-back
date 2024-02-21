@@ -3,6 +3,7 @@
 import bodyParser from "body-parser";
 import dotenv from 'dotenv';
 import express from "express";
+import { authMiddleware } from "./controllers/middleware/authMiddleware.js";
 import connectDb from "./database/db.js";
 import routerNotification from "./routes/Notification.js";
 import { default as routerLandlord, default as routerTenant } from "./routes/Proprietaire.js";
@@ -26,7 +27,7 @@ connectDb();
 
 app.use('/users/tenants', routerTenant)
 app.use('/users/landlords', routerLandlord)
-app.use('/proprieties', routerPropriety)
-app.use('/notifications', routerNotification)
+app.use('/proprieties',authMiddleware, routerPropriety)
+app.use('/notifications',authMiddleware, routerNotification)
 
 

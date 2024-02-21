@@ -1,5 +1,7 @@
 import fs from "fs";
+import mimeTypes from 'mime-types';
 import multer from "multer";
+import path from "path";
 import tmp from "tmp";
 import Image from '../models/Image.js';
 

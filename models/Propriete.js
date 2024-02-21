@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 
 const Propriety = mongoose.model('proprietes', {
+    proprietyId: {
+        type: String,
+    },
     proprietyName: {
         type: String,
         required: [true, "The Propriety fullname is required"],
