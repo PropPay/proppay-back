@@ -322,7 +322,7 @@ const signinLandlord = (async (req, res) => {
             } else {
                 bcrypt.compare(req.body.landlordPassword, landlord.landlordPassword)
                     .then(valid => {
-                        console.log('valid');
+                        console.log(valid);
                         if (valid == false) {
                             console.log("password");
                             res.status(400).json({
@@ -340,9 +340,9 @@ const signinLandlord = (async (req, res) => {
                             })
                         }
                     })
-                    .catch(error => res.json({
-                        message : "no compare",
-                        error }))
+                .catch(error => res.json({
+                    message : "no compare",
+                    error }))
             }
         })
 })
