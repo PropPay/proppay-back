@@ -291,15 +291,20 @@ const signupLandlord = (async (req, res) => {
                     await landlord.save()
                         .then(() => {
                             const token = createToken(user._id);
+                            console.log("inscrit");
                             res.status(201).json({
                             message: 'user enregistré !',
                             data: landlord,
                             token : token
                         })})
-                        .catch(error => res.status(400).json({ error }));
+                        .catch(error => res.status(400).json({
+                            message : "non inscrit",
+                            error }));
                     console.log(landlord);
                 })
-                .catch(error => res.status(500).json({ error }))
+                .catch(error => res.status(500).json({
+                    message : "no hash",
+                    error }))
         }
     } catch (error) {
         console.log(error);
@@ -319,12 +324,14 @@ const signinLandlord = (async (req, res) => {
                     .then(valid => {
                         console.log('valid');
                         if (valid == false) {
+                            console.log("password");
                             res.status(400).json({
                                 status: "400",
                                 message: 'user et / ou mot de passe incorrect'
                             })
                         } else {
                             const token = createToken(landlord._id);
+                            console.log("con");
                             return res.status(201).json({
                                 status: "201",
                                 data: landlord,
@@ -333,7 +340,9 @@ const signinLandlord = (async (req, res) => {
                             })
                         }
                     })
-                    .catch(error => res.json({ error }))
+                    .catch(error => res.json({
+                        message : "no compare",
+                        error }))
             }
         })
 })
