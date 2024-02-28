@@ -1,4 +1,6 @@
+import axios from 'axios';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
 import fs from "fs";
 import jwt from "jsonwebtoken";
 import mimeTypes from 'mime-types';
@@ -6,13 +8,31 @@ import path from "path";
 import tmp from "tmp";
 import Landlord from '../models/Proprietaire.js';
 import Propriety from '../models/Propriete.js';
+import { generateOTP } from './middleware/otpMiddleware.js';
 
+
+// constante pour recuperer le code envoyé
+let otpSend = "";
 // Fonction pour créer un jeton JWT
 const createToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
         expiresIn: "100000h", // Durée de validité du token
     });
 };
+
+// Fonction pour valider le code (à implémenter selon vos besoins)
+function isValidCode(userId, enteredCode) {
+    if (userId == enteredCode) {
+        return true;
+    }
+    return false;
+}
+
+// Stocker le nombre de demandes et les timestamps côté serveur
+let requestsCount = {};
+let codeTimestamps = {};
+
+// Les différents endpoints
 
 const addTenant = (async (req, res) => {
     try {
@@ -36,6 +56,92 @@ const addTenant = (async (req, res) => {
         res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
     }
 })
+
+const sendAuthOTP =  (async (req, res) => {
+    try {
+
+        dotenv.config({ path: './config/.env' })
+
+        // le userNumber represente le msisdn
+        const userNumber = req.body.userNumber
+        const userNumberCount = userNumber.substring(6)
+
+        if (requestsCount[userNumberCount] && requestsCount[userNumberCount] >= 2) {
+            const timeDifference = new Date() - codeTimestamps[userNumberCount];
+            if (timeDifference < 24 * 60 * 60 * 1000) { // 5 minutes en millisecondes
+                return res.send("Limite de demandes atteinte. Attendez un moment avant de demander un nouveau code.");
+            }
+        }
+
+        // Fonction pour créer un OTP
+        const otpCode = generateOTP();
+
+        // les éléments du body
+        const userName = process.env.USER_NAME;
+        const password = process.env.PASSWORD;
+        const serviceid = process.env.SERVICEID;
+        const sender = process.env.SENDER;
+        const msg = `Votre code de sécurité pour [Nom de l'application] est : ${otpCode}. Valable [durée, ex: 5 min]. Ne partagez pas.`
+
+        // Stocker le timestamp actuel
+        codeTimestamps[userNumberCount] = new Date();
+
+        // Incrémenter le compteur de demandes
+        requestsCount[userNumberCount] = (requestsCount[userNumberCount] || 0) + 1;
+
+        // l'api externe de m target
+        const apiExterne = `https://api-public-2.mtarget.fr/messages?username=${userName}&password=${password}&serviceid=${serviceid}&msisdn=${userNumber}&sender=${sender}&msg=${msg}`;
+
+        /* const body = {
+            "username": username,
+            "password": password,
+            "serviceid": serviceid,
+            "msisdn": msisdn,
+            "sender": sender,
+            "msg": msg
+        } */
+
+        await axios.post(apiExterne, {
+            headers: {
+                "Content-Type" : "application/x-www-form-urlencoded"
+            }})
+            .then(resp => {
+                otpSend = otpCode;
+                res.status(201).json(
+                    {
+                        data : otpSend,
+                        message : "otpSend"
+                    })})
+            .catch(error =>
+                {
+                    res.send("no otpSend");
+                    console.log(error)});
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+const verifyAuthOTP = (async (req, res) => {
+
+    const { otpCode,userNumber } = req.body;
+    const userNumberCount = userNumber.substring(4)
+
+    // Vérifier si l'utilisateur a demandé un code récemment
+    if (codeTimestamps[userNumberCount]) {
+        const timeDifference = new Date() - codeTimestamps[userNumberCount];
+        if (timeDifference > 5 * 60 * 1000) { // 5 minutes en millisecondes
+            return res.send("Le code a expiré.");
+        }
+    }
+    
+    // Vérifier si le code est correct (à implémenter selon vos besoins)
+    if (isValidCode(otpSend, otpCode)) {
+        // Réinitialiser le compteur de demandes
+        requestsCount[userNumberCount] = 0;
+        return res.send("Code de vérification valide.");
+    }
+    res.send("Code de vérification invalide.");
+});
 
 const ajouterPropriete = (async (req, res) => {
     try {
@@ -323,13 +429,14 @@ const signinLandlord = (async (req, res) => {
                 bcrypt.compare(req.body.landlordPassword, landlord.landlordPassword)
                     .then(valid => {
                         console.log(valid);
-                        if (valid == false) {
+                        if (!valid) {
                             console.log("password");
                             res.status(400).json({
                                 status: "400",
                                 message: 'user et / ou mot de passe incorrect'
                             })
-                        } else {
+                        }
+                        if (valid) {
                             const token = createToken(landlord._id);
                             console.log("con");
                             return res.status(201).json({
@@ -347,5 +454,5 @@ const signinLandlord = (async (req, res) => {
         })
 })
 
-export { addTenant, confirmLandlordPassword, deleteLandlord, getLandlord, getLandlordProprietiesImages, getLandlordProprietiesInfo, getLandlords, getPhotoProfil, signinLandlord, signupLandlord, updateLandlordNumber, updateLandlordPassword, updateProfil, updateProfilImage };
+export { addTenant, confirmLandlordPassword, deleteLandlord, getLandlord, getLandlordProprietiesImages, getLandlordProprietiesInfo, getLandlords, getPhotoProfil, sendAuthOTP, signinLandlord, signupLandlord, updateLandlordNumber, updateLandlordPassword, updateProfil, updateProfilImage, verifyAuthOTP };
 

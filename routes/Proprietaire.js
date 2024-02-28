@@ -10,12 +10,14 @@ import {
     getLandlordProprietiesInfo,
     getLandlords,
     getPhotoProfil,
+    sendAuthOTP,
     signinLandlord,
     signupLandlord,
     updateLandlordNumber,
     updateLandlordPassword,
     updateProfil,
-    updateProfilImage
+    updateProfilImage,
+    verifyAuthOTP
 } from '../controllers/Proprietaire.js';
 import { upload } from '../controllers/Propriete.js';
 import { authMiddleware } from '../controllers/middleware/authMiddleware.js';
@@ -31,6 +33,8 @@ routerLandlord.get('/proprieties/image/:landlordNumber', getLandlordProprietiesI
 routerLandlord.post('/signup', signupLandlord)
 routerLandlord.post('/signin', signinLandlord)
 routerLandlord.post('/confirm/password/:landlordNumber',authMiddleware, confirmLandlordPassword)
+routerLandlord.post('/otp/send',sendAuthOTP)
+routerLandlord.post('/otp/verify', verifyAuthOTP)
 
 routerLandlord.put('/add-tenant/:landlordNumber',authMiddleware, addTenant)
 routerLandlord.put('/:_id',authMiddleware, updateLandlordNumber)

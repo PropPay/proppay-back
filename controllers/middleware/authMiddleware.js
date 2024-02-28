@@ -14,11 +14,11 @@ export const authMiddleware = async (req, res, next) => {
     const token = req.headers.authorization;
     console.log(token);
     if (!token) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: " auth Unauthorized" });
     }
     const userId = verifyToken(token);
     if (!userId) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "auth Unauthorized" });
     }
     req.userId = userId;
     next();
