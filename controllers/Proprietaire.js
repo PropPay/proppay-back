@@ -16,7 +16,7 @@ let otpSend = "";
 // Fonction pour créer un jeton JWT
 const createToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
-        expiresIn: "100000h", // Durée de validité du token
+        expiresIn: "24h", // Durée de validité du token
     });
 };
 
@@ -396,7 +396,7 @@ const signupLandlord = (async (req, res) => {
                     })
                     await landlord.save()
                         .then(() => {
-                            const token = createToken(user._id);
+                            const token = createToken(landlord._id);
                             console.log("inscrit");
                             res.status(201).json({
                             message: 'user enregistré !',
@@ -406,7 +406,6 @@ const signupLandlord = (async (req, res) => {
                         .catch(error => res.status(400).json({
                             message : "non inscrit",
                             error }));
-                    console.log(landlord);
                 })
                 .catch(error => res.status(500).json({
                     message : "no hash",
