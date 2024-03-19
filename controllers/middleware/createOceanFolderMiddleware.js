@@ -2,17 +2,17 @@ import aws from "aws-sdk";
 import multer from "multer";
 import multerS3 from "multer-s3";
 
-const spacesEndpoint = new aws.Endpoint('ams3.digitaloceanspaces.com'); // Mettez à jour avec la région de votre Space
+const spacesEndpoint = new aws.Endpoint(process.env.endpoint); // Mettez à jour avec la région de votre Space
 const s3 = new aws.S3({
     endpoint: spacesEndpoint,
-    accessKeyId: "DO00FCQLXA6M7RL9U2DT",
-    secretAccessKey: "bnBwbWr/cqiNAKMs9XMtOIj6Q4kSTuOpFaoAWfPvAQM"
+    accessKeyId: process.env.accessKeyId,
+    secretAccessKey: process.env.secretAccessKey
 });
 
 const upload = (fieldName, bucketName) => multer({
     storage: multerS3({
         s3: s3,
-        bucket: `propay-storage/${bucketName}`,
+        bucket: `${process.env.bucket}/${bucketName}`,
         contentType: multerS3.AUTO_CONTENT_TYPE,
         acl: 'public-read',
         key: function (req, file, cb) {
@@ -24,7 +24,7 @@ const upload = (fieldName, bucketName) => multer({
 const uploadFieldName = (bucketName) => multer({
     storage: multerS3({
         s3: s3,
-        bucket: `propay-storage/${bucketName}`,
+        bucket: `${process.env.bucket}/${bucketName}`,
         contentType: multerS3.AUTO_CONTENT_TYPE,
         acl: 'public-read',
         key: function (req, file, cb) {
@@ -65,4 +65,3 @@ const copyFile = (sourceBucket, sourceKey, destinationBucket, destinationKey) =>
 };
 
 export { copyFile, deleteFile, s3, spacesEndpoint, upload, uploadFieldName };
-

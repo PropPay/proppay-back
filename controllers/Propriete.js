@@ -6,7 +6,7 @@ const addPropriety = (async (req, res) => {
 
         let proofOfPropriety;
         let proprietyImages;
-        /* uploadFieldName('propay-storage/proprieties')(req, res, function (err) {
+        uploadFieldName('propay-storage/proprieties')(req, res, function (err) {
             if (err) {
                 console.error('Error uploading files to DigitalOcean Spaces:', err);
                 return res.status(500).send('Error uploading files to DigitalOcean Spaces');
@@ -15,7 +15,7 @@ const addPropriety = (async (req, res) => {
             proprietyImages = req.files['fieldName1'][0].location;
             proofOfPropriety = req.files['fieldName2'][0].location;
             //copyFile('propay-storage/proprieties',req.files['fieldName2'][0].key,'propay-storage/preuves',req.files['fieldName2'][0].key)
-        }); */
+        });
         const obj = JSON.parse(JSON.stringify(req.body));
         console.log(obj);
         // Ajouter la propriété dans la base de données 'propriétés
