@@ -19,7 +19,6 @@ import {
     updateProfilImage,
     verifyAuthOTP
 } from '../controllers/Proprietaire.js';
-import { upload } from '../controllers/Propriete.js';
 import { authMiddleware } from '../controllers/middleware/authMiddleware.js';
 
 
@@ -39,9 +38,12 @@ routerLandlord.post('/otp/verify', verifyAuthOTP)
 routerLandlord.put('/add-tenant/:landlordNumber',authMiddleware, addTenant)
 routerLandlord.put('/:_id',authMiddleware, updateLandlordNumber)
 routerLandlord.put(('/update-password/:landlordNumber'),authMiddleware, updateLandlordPassword)
-routerLandlord.put(('/update-profil/:landlordNumber'),upload.single('identity'),authMiddleware, updateProfil)
-routerLandlord.put(('/photo-profil/:landlordNumber'), upload.single('profile'),authMiddleware, updateProfilImage)
+routerLandlord.put(('/update-profil/:landlordNumber'), updateProfil)
+routerLandlord.put(('/photo-profil/:landlordNumber'), updateProfilImage)
 
 routerLandlord.delete('/:landlordNumber',authMiddleware, deleteLandlord)
+
+/* upload.single('identity'),
+ */
 
 export default routerLandlord

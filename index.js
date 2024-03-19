@@ -1,6 +1,7 @@
 //npm install -g firebase-tools
 
 import bodyParser from "body-parser";
+import cors from 'cors';
 import dotenv from 'dotenv';
 import express from "express";
 import { authMiddleware } from "./controllers/middleware/authMiddleware.js";
@@ -12,8 +13,22 @@ import routerPropriety from "./routes/Propriete.js";
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+app.use(cors("*"));
 
+dotenv.config({ path: './config/.env' })
+connectDb();
+
+/* app.post('/landlords',upload.single('landlords'), (async (req, res) => {
+    console.log(req.file);
+    await uploadFileToFolder("landlords5",req.file.originalname)
+    res.json({ fileUrl: req.file.location });
+})); */
+
+app.use('/users/tenants', routerTenant)
+app.use('/users/landlords', routerLandlord)
+app.use('/proprieties', routerPropriety)
+app.use('/notifications', authMiddleware, routerNotification)
 
 app.listen(3000, (err) => {
     if (err) {
@@ -22,12 +37,5 @@ app.listen(3000, (err) => {
     console.log("server is running on " + process.env.PORT);
 })
 
-dotenv.config({ path: './config/.env' })
-connectDb();
-
-app.use('/users/tenants', routerTenant)
-app.use('/users/landlords', routerLandlord)
-app.use('/proprieties',authMiddleware, routerPropriety)
-app.use('/notifications',authMiddleware, routerNotification)
 
 

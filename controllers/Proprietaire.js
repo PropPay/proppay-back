@@ -1,13 +1,12 @@
 import axios from 'axios';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
-import fs from "fs";
 import jwt from "jsonwebtoken";
 import mimeTypes from 'mime-types';
 import path from "path";
-import tmp from "tmp";
 import Landlord from '../models/Proprietaire.js';
 import Propriety from '../models/Propriete.js';
+import { upload } from './middleware/createOceanFolderMiddleware.js';
 import { generateOTP } from './middleware/otpMiddleware.js';
 
 
@@ -57,7 +56,7 @@ const addTenant = (async (req, res) => {
     }
 })
 
-const sendAuthOTP =  (async (req, res) => {
+const sendAuthOTP = (async (req, res) => {
     try {
 
         dotenv.config({ path: './config/.env' })
@@ -103,19 +102,21 @@ const sendAuthOTP =  (async (req, res) => {
 
         await axios.post(apiExterne, {
             headers: {
-                "Content-Type" : "application/x-www-form-urlencoded"
-            }})
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+        })
             .then(resp => {
                 otpSend = otpCode;
                 res.status(201).json(
                     {
-                        data : otpSend,
-                        message : "otpSend"
-                    })})
-            .catch(error =>
-                {
-                    res.send("no otpSend");
-                    console.log(error)});
+                        data: otpSend,
+                        message: "otpSend"
+                    })
+            })
+            .catch(error => {
+                res.send("no otpSend");
+                console.log(error)
+            });
     } catch (error) {
         console.log(error);
     }
@@ -123,7 +124,7 @@ const sendAuthOTP =  (async (req, res) => {
 
 const verifyAuthOTP = (async (req, res) => {
 
-    const { otpCode,userNumber } = req.body;
+    const { otpCode, userNumber } = req.body;
     const userNumberCount = userNumber.substring(4)
 
     // Vérifier si l'utilisateur a demandé un code récemment
@@ -133,7 +134,7 @@ const verifyAuthOTP = (async (req, res) => {
             return res.send("Le code a expiré.");
         }
     }
-    
+
     // Vérifier si le code est correct (à implémenter selon vos besoins)
     if (isValidCode(otpSend, otpCode)) {
         // Réinitialiser le compteur de demandes
@@ -209,18 +210,11 @@ const getLandlord = (async (req, res) => {
 
 const getPhotoProfil = (async (req, res) => {
     try {
-        const landlord = await Landlord.findOne({landlordNumber: req.params.landlordNumber});
+        const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
         if (!landlord) {
             return res.status(404).send('user non trouvé.');
-        }
-
-        // Utilisez l'extension du fichier pour déterminer le type MIME
-        const fileExtension = path.extname(landlord.profilImage.imagePath).slice(1);
-        const mimeType = mimeTypes.lookup(fileExtension) || 'application/octet-stream';
-
-        res.set('Content-Type', mimeType); // Assurez-vous de définir le type MIME approprié
-        
-        res.send(landlord.profilImage.data);
+        } // Assurez-vous de définir le type MIME approprié
+        res.send(landlord.profilImage);
     } catch (error) {
         console.error(error);
         res.status(500).send('Erreur lors de la récupération de l\'image.');
@@ -229,7 +223,7 @@ const getPhotoProfil = (async (req, res) => {
 
 const getLandlordProprietiesImages = (async (req, res) => {
     try {
-        const landlord = await Landlord.findOne({landlordNumber: req.params.landlordNumber});
+        const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
         if (!landlord) {
             return res.status(404).send('user not find.');
         }
@@ -240,7 +234,7 @@ const getLandlordProprietiesImages = (async (req, res) => {
         }
 
         const proprietiesImages = await Promise.all(proprieties.map(async (proprietyId) => {
-            const propriety = await Propriety.findOne({proprietyName: proprietyId});
+            const propriety = await Propriety.findOne({ proprietyName: proprietyId });
             const fileExtension = path.extname(propriety.proprietyImages.imagePath).slice(1);
             const mimeType = mimeTypes.lookup(fileExtension) || 'application/octet-stream';
             res.set('Content-Type', mimeType);
@@ -262,7 +256,7 @@ const getLandlordProprietiesImages = (async (req, res) => {
 
 const getLandlordProprietiesInfo = (async (req, res) => {
     try {
-        const landlord = await Landlord.findOne({landlordNumber: req.params.landlordNumber});
+        const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
         if (!landlord) {
             return res.status(404).send('user not find.');
         }
@@ -273,7 +267,7 @@ const getLandlordProprietiesInfo = (async (req, res) => {
         }
 
         const proprietiesInfo = await Promise.all(proprieties.map(async (proprietyId) => {
-            const propriety = await Propriety.findOne({proprietyName: proprietyId});
+            const propriety = await Propriety.findOne({ proprietyName: proprietyId });
             return {
                 proprietyName: propriety.proprietyName,
                 proprietyAdress: propriety.proprietyAdress,
@@ -291,23 +285,24 @@ const getLandlordProprietiesInfo = (async (req, res) => {
 
 const updateProfil = (async (req, res) => {
     try {
-        const tmpFile = tmp.fileSync();
-        fs.writeFileSync(tmpFile.name, req.file.buffer);
-
+        console.log(req.body);
         await Landlord.findOne({ landlordNumber: req.params.landlordNumber })
             .then(async user => {
                 if (!user) {
                     return res.status(500).json({ message: "user n'existe pas" })
                 }
-                user.landlordFirstname = req.body.landlordFirstname,
+                await upload('identity','landlords/pieces')(req, res, async function (error) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    console.log(req.file);
+                    user.landlordFirstname = req.body.landlordFirstname,
                     user.landlordLastname = req.body.landlordLastname,
                     user.landlordAdress = req.body.landlordAdress,
-                    user.identityCard = {
-                        pdfPath: req.file.originalname,
-                        data: req.file.buffer
-                    }
-                await user.save();
-                res.send(user)
+                    user.identity = req.file.location
+                    await user.save();
+                    res.send(user)
+                })
             }
             )
     } catch (error) {
@@ -317,20 +312,21 @@ const updateProfil = (async (req, res) => {
 
 const updateProfilImage = (async (req, res) => {
     try {
-        const tmpFile = tmp.fileSync();
-        fs.writeFileSync(tmpFile.name, req.file.buffer);
 
         await Landlord.findOne({ landlordNumber: req.params.landlordNumber })
             .then(async user => {
                 if (!user) {
                     return res.status(500).json({ message: "user n'existe pas" })
                 }
-                user.profilImage = {
-                    imagePath: req.file.originalname,
-                    data: req.file.buffer,
-                }
-                await user.save();
-                res.send(user)
+                await upload('profile','photos de profil')(req, res, async function (error) {
+                    if (error) {
+                        console.log(error);
+                    }
+                    console.log(req.file);
+                    user.profilImage = req.file.location
+                    await user.save();
+                    res.send(user)
+                })
             }
             )
     } catch (error) {
@@ -399,17 +395,20 @@ const signupLandlord = (async (req, res) => {
                             const token = createToken(landlord._id);
                             console.log("inscrit");
                             res.status(201).json({
-                            message: 'user enregistré !',
-                            data: landlord,
-                            token : token
-                        })})
+                                message: 'user enregistré !',
+                                data: landlord,
+                                token: token
+                            })
+                        })
                         .catch(error => res.status(400).json({
-                            message : "non inscrit",
-                            error }));
+                            message: "non inscrit",
+                            error
+                        }));
                 })
                 .catch(error => res.status(500).json({
-                    message : "no hash",
-                    error }))
+                    message: "no hash",
+                    error
+                }))
         }
     } catch (error) {
         console.log(error);
@@ -441,14 +440,15 @@ const signinLandlord = (async (req, res) => {
                             return res.status(201).json({
                                 status: "201",
                                 data: landlord,
-                                token : token,
+                                token: token,
                                 message: 'connected'
                             })
                         }
                     })
-                .catch(error => res.json({
-                    message : "no compare",
-                    error }))
+                    .catch(error => res.json({
+                        message: "no compare",
+                        error
+                    }))
             }
         })
 })

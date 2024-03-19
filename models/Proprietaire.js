@@ -17,17 +17,11 @@ const Landlord = mongoose.model('landlords', {
     landlordAdress: {
         type: String
     },
-    profilImage: {
-        imagePath: String,
-        data: Buffer,
-    },
+    profilImage: String,
     landlordPassword: {
         type: String
     },
-    identityCard : {
-        pdfPath: String,
-        data: Buffer
-    },
+    identity: String,
     listOfTenants: {
         type: Map,
         of:Map,
