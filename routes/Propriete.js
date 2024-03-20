@@ -4,7 +4,7 @@ const routerPropriety = express.Router()
 
 
 
-routerPropriety.post('/add/:landlordNumber', addPropriety)
+routerPropriety.post('/add', addPropriety)
 /* routerImage.get('/upload/:id',getImage) */
 
 

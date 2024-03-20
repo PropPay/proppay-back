@@ -91,15 +91,6 @@ const sendAuthOTP = (async (req, res) => {
         // l'api externe de m target
         const apiExterne = `https://api-public-2.mtarget.fr/messages?username=${userName}&password=${password}&serviceid=${serviceid}&msisdn=${userNumber}&sender=${sender}&msg=${msg}`;
 
-        /* const body = {
-            "username": username,
-            "password": password,
-            "serviceid": serviceid,
-            "msisdn": msisdn,
-            "sender": sender,
-            "msg": msg
-        } */
-
         await axios.post(apiExterne, {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
@@ -285,26 +276,23 @@ const getLandlordProprietiesInfo = (async (req, res) => {
 
 const updateProfil = (async (req, res) => {
     try {
-        console.log(req.body);
-        await Landlord.findOne({ landlordNumber: req.params.landlordNumber })
+        await upload('identity','landlords/pieces')(req, res, async function (error) {
+            if (error) {
+                console.log(error);
+            }
+            await Landlord.findOne({ landlordNumber: req.body.landlordNumber })
             .then(async user => {
                 if (!user) {
                     return res.status(500).json({ message: "user n'existe pas" })
                 }
-                await upload('identity','landlords/pieces')(req, res, async function (error) {
-                    if (error) {
-                        console.log(error);
-                    }
-                    console.log(req.file);
-                    user.landlordFirstname = req.body.landlordFirstname,
-                    user.landlordLastname = req.body.landlordLastname,
-                    user.landlordAdress = req.body.landlordAdress,
-                    user.identity = req.file.location
-                    await user.save();
-                    res.send(user)
-                })
-            }
-            )
+                user.landlordFirstname = req.body.landlordFirstname,
+                user.landlordLastname = req.body.landlordLastname,
+                user.landlordAdress = req.body.landlordAdress,
+                user.identity = req.file.location
+                await user.save();
+                res.send(user)
+            })
+        })
     } catch (error) {
         console.log(error);
     }
@@ -312,23 +300,20 @@ const updateProfil = (async (req, res) => {
 
 const updateProfilImage = (async (req, res) => {
     try {
-
-        await Landlord.findOne({ landlordNumber: req.params.landlordNumber })
+        await upload('profile','photos de profil')(req, res, async function (error) {
+            if (error) {
+                console.log(error);
+            }
+            await Landlord.findOne({ landlordNumber: req.body.landlordNumber })
             .then(async user => {
                 if (!user) {
                     return res.status(500).json({ message: "user n'existe pas" })
                 }
-                await upload('profile','photos de profil')(req, res, async function (error) {
-                    if (error) {
-                        console.log(error);
-                    }
-                    console.log(req.file);
-                    user.profilImage = req.file.location
-                    await user.save();
-                    res.send(user)
-                })
-            }
-            )
+                user.profilImage = req.file.location
+                await user.save();
+                res.send(user)
+            })
+        })
     } catch (error) {
         console.log(error);
     }
@@ -336,7 +321,7 @@ const updateProfilImage = (async (req, res) => {
 
 const updateLandlordPassword = (async (req, res) => {
     try {
-        await Landlord.findOne({ landlordNumber: req.params.landlordNumber })
+        await Landlord.findOne({ landlordNumber: req.body.landlordNumber })
             .then(
                 async user => {
                     if (!user) {
@@ -359,7 +344,7 @@ const updateLandlordPassword = (async (req, res) => {
     }
 })
 
-const updateLandlordNumber = (async (req, res) => {
+/* const updateLandlordNumber = (async (req, res) => {
     try {
         await Landlord.findOne({ _id: req.params._id })
             .then(
@@ -373,7 +358,7 @@ const updateLandlordNumber = (async (req, res) => {
     } catch (error) {
         console.log(error);
     }
-})
+}) */
 
 const signupLandlord = (async (req, res) => {
     try {
@@ -453,5 +438,5 @@ const signinLandlord = (async (req, res) => {
         })
 })
 
-export { addTenant, confirmLandlordPassword, deleteLandlord, getLandlord, getLandlordProprietiesImages, getLandlordProprietiesInfo, getLandlords, getPhotoProfil, sendAuthOTP, signinLandlord, signupLandlord, updateLandlordNumber, updateLandlordPassword, updateProfil, updateProfilImage, verifyAuthOTP };
+export { addTenant, confirmLandlordPassword, deleteLandlord, getLandlord, getLandlordProprietiesImages, getLandlordProprietiesInfo, getLandlords, getPhotoProfil, sendAuthOTP, signinLandlord, signupLandlord, updateLandlordPassword, updateProfil, updateProfilImage, verifyAuthOTP };
 

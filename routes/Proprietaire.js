@@ -13,7 +13,6 @@ import {
     sendAuthOTP,
     signinLandlord,
     signupLandlord,
-    updateLandlordNumber,
     updateLandlordPassword,
     updateProfil,
     updateProfilImage,
@@ -36,14 +35,12 @@ routerLandlord.post('/otp/send',sendAuthOTP)
 routerLandlord.post('/otp/verify', verifyAuthOTP)
 
 routerLandlord.put('/add-tenant/:landlordNumber',authMiddleware, addTenant)
-routerLandlord.put('/:_id',authMiddleware, updateLandlordNumber)
+/* routerLandlord.put('/:_id',authMiddleware, updateLandlordNumber) */
 routerLandlord.put(('/update-password/:landlordNumber'),authMiddleware, updateLandlordPassword)
-routerLandlord.put(('/update-profil/:landlordNumber'), updateProfil)
-routerLandlord.put(('/photo-profil/:landlordNumber'), updateProfilImage)
+routerLandlord.put(('/update-profil'), updateProfil)
+routerLandlord.put(('/photo-profil'), updateProfilImage)
 
 routerLandlord.delete('/:landlordNumber',authMiddleware, deleteLandlord)
 
-/* upload.single('identity'),
- */
 
 export default routerLandlord

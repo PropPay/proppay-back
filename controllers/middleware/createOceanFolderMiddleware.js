@@ -1,22 +1,35 @@
 import aws from "aws-sdk";
+import dotenv from 'dotenv';
 import multer from "multer";
 import multerS3 from "multer-s3";
+import Landlord from "../../models/Proprietaire.js";
 
-const spacesEndpoint = new aws.Endpoint(process.env.endpoint); // Mettez à jour avec la région de votre Space
+dotenv.config({ path: './../../config/.env' })
+
+const spacesEndpoint = new aws.Endpoint('ams3.digitaloceanspaces.com'); // Mettez à jour avec la région de votre Space
 const s3 = new aws.S3({
     endpoint: spacesEndpoint,
-    accessKeyId: process.env.accessKeyId,
-    secretAccessKey: process.env.secretAccessKey
+    accessKeyId: process.env.ACCESSKEYID,
+    secretAccessKey: process.env.SECRETACCESSKEY
 });
 
 const upload = (fieldName, bucketName) => multer({
     storage: multerS3({
         s3: s3,
-        bucket: `${process.env.bucket}/${bucketName}`,
+        bucket: `${process.env.BUCKET}/${bucketName}`,
         contentType: multerS3.AUTO_CONTENT_TYPE,
         acl: 'public-read',
-        key: function (req, file, cb) {
-            cb(null, Date.now().toString() + '-' + file.originalname);
+        key: async function (req, file, cb) {
+            console.log(req.body);
+            await Landlord.findOne({ landlordNumber: req.body.landlordNumber })
+            .then(async user => {
+                console.log(user);
+                if (!user) {
+                    console.log("user n'existe pas");
+                }
+                cb(null, Date.now().toString() + '-' + file.originalname);
+            })
+            
         }
     })
 }).single(fieldName);
@@ -24,7 +37,7 @@ const upload = (fieldName, bucketName) => multer({
 const uploadFieldName = (bucketName) => multer({
     storage: multerS3({
         s3: s3,
-        bucket: `${process.env.bucket}/${bucketName}`,
+        bucket: `${process.env.BUCKET}/${bucketName}`,
         contentType: multerS3.AUTO_CONTENT_TYPE,
         acl: 'public-read',
         key: function (req, file, cb) {
