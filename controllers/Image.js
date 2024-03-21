@@ -1,9 +1,8 @@
-import fs from "fs";
 import mimeTypes from 'mime-types';
 import multer from "multer";
 import path from "path";
-import tmp from "tmp";
 import Image from '../models/Image.js';
+import { uploadDo } from './middleware/createOceanFolderMiddleware.js';
 
 // Configurations Multer pour le stockage des fichiers temporaires
 const storage = multer.memoryStorage(
@@ -16,12 +15,21 @@ const storage = multer.memoryStorage(
         }
     });
 
-export const upload = multer({ storage: storage });
+//export const upload = multer({ storage: storage });
 
 const postImage = (async (req, res) => {
     try {
-
-        const imageFile = req.files['images'][0];
+        await uploadDo('profile','photos de profil')(req, res, async function (error) {
+            if (error) {
+                console.log(error);
+            }
+            console.log(req.file);
+            const image = new Image({
+                image: req.file.location
+            })
+            await image.save()
+        })
+        /* const imageFile = req.files['images'][0];
         const pdfFile = req.files['pdfs'][0];
         const { title, description } = req.body;
 
@@ -41,12 +49,7 @@ const postImage = (async (req, res) => {
             },
             title: title,
             description: description
-        });
-
-        /*         filename: req.file.originalname
-         */
-
-        await image.save();
+        }); */
 
         res.status(201).json({
             message: 'Image et données téléchargées avec succès.',

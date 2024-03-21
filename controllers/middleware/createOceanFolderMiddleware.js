@@ -17,6 +17,19 @@ const s3 = new aws.S3({
     secretAccessKey: process.env.SECRETACCESSKEY
 });
 
+const uploadDo = (fieldName, bucketName) => multer({
+    storage: multerS3({
+        s3: s3,
+        bucket: `${process.env.BUCKET}/${bucketName}`,
+        contentType: multerS3.AUTO_CONTENT_TYPE,
+        acl: 'public-read',
+        key: function (req, file, cb) {
+            cb(null, Date.now().toString() + '-' + file.originalname);
+        }
+            
+    }),
+}).single(fieldName);
+
 const upload = (fieldName, bucketName) => multer({
     storage: multerS3({
         s3: s3,
@@ -82,4 +95,5 @@ const copyFile = (sourceBucket, sourceKey, destinationBucket, destinationKey) =>
     });
 };
 
-export { copyFile, deleteFile, s3, spacesEndpoint, upload, uploadFieldName };
+export { copyFile, deleteFile, s3, spacesEndpoint, upload, uploadDo, uploadFieldName };
+
