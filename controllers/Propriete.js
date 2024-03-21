@@ -7,7 +7,7 @@ const addPropriety = (async (req, res) => {
 
         let proofOfPropriety;
         let proprietyImages;
-        
+
         await uploadFieldName('proprieties')(req, res, async function (err) {
             if (err) {
                 console.error('Error uploading files to DigitalOcean Spaces:', err);
@@ -29,25 +29,25 @@ const addPropriety = (async (req, res) => {
                 proprietyOccupation: req.body.proprietyOccupation,
                 proofOfPropriety: proofOfPropriety
             })
-        await propriety.save()
-        console.log(propriety);
-        // Ajouter la propriété dans le champ 'listepropriety' du locataire
+            await propriety.save()
+            console.log(propriety);
+            // Ajouter la propriété dans le champ 'listepropriety' du locataire
 
-        /* const proprietyValeur = {
-            proprietyName: req.body.proprietyName,
-            proprietyAdress: req.body.proprietyAdress,
-            proprietyType: req.body.proprietyType,
-            proprietyImages: req.body.proprietyImages,
-            proprietyOccupation: req.body.proprietyOccupation,
-            PreuveDepropriety: req.body.PreuveDepropriety
-        } */
+            /* const proprietyValeur = {
+                proprietyName: req.body.proprietyName,
+                proprietyAdress: req.body.proprietyAdress,
+                proprietyType: req.body.proprietyType,
+                proprietyImages: req.body.proprietyImages,
+                proprietyOccupation: req.body.proprietyOccupation,
+                PreuveDepropriety: req.body.PreuveDepropriety
+            } */
 
-        const proprietyId = req.body.landlordNumber + '-' + req.body.proprietyName
+            const proprietyId = req.body.landlordNumber + '-' + req.body.proprietyName
 
-        const landlord = await Landlord.findOne({ landlordNumber: req.body.landlordNumber });
-        landlord.listOfProprieties.push(proprietyId)
-        await landlord.save();
-        res.status(200).json({ message: 'Élément ajouté avec succès' });
+            const landlord = await Landlord.findOne({ landlordNumber: req.body.landlordNumber });
+            landlord.listOfProprieties.push(proprietyId)
+            await landlord.save();
+            res.status(200).json({ message: 'Élément ajouté avec succès' });
         });
     } catch (error) {
         console.error(error);
@@ -64,8 +64,26 @@ const getPropriety = (async (req, res) => {
 })
 
 const deletePropriety = (async (req, res) => {
-    const propriety = await Propriety.findOne({ _id: req.params.id })
-    await Propriety.deleteOne({ _id: propriety._id.toString() }).then(result => res.send(result))
+    try {
+        const propriety = await Propriety.findById(req.params.id);
+    const elt = propriety.proprietyId;
+    const landlord = await Landlord.findOne({ landlordNumber: propriety.proprietyId.substr(0, 14) });
+    const proprieties = landlord.listOfProprieties
+    if (!proprieties) {
+        return res.status(404).send('no proprieties find')
+    }
+    console.log(proprieties);
+    console.log("*********************************************************");
+    const newProprieties = proprieties.filter(proprietyId => proprietyId !== elt);
+    landlord.listOfProprieties = newProprieties;
+    await landlord.save();
+    await Propriety.deleteOne({ _id: propriety._id.toString() })
+    console.log(newProprieties);
+    res.send("Propriety correctly removed")
+    } catch (error) {
+        console.log("error :"+error);
+        console.log("Propriety correctly removed");
+    }
 })
 
 export { addPropriety, deletePropriety, getProprieties, getPropriety };

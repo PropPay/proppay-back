@@ -2,8 +2,6 @@ import axios from 'axios';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
-import mimeTypes from 'mime-types';
-import path from "path";
 import Landlord from '../models/Proprietaire.js';
 import Propriety from '../models/Propriete.js';
 import { upload } from './middleware/createOceanFolderMiddleware.js';
@@ -37,6 +35,7 @@ const addTenant = (async (req, res) => {
     try {
         const number = req.body.tenantNumber
         const locataire = {
+            ProprietyName: req.body.ProprietyName,
             tenantFirstname: req.body.tenantFirstname,
             tenantLastname: req.body.tenantLastname,
             appartementNumber: req.body.appartementNumber,
@@ -44,12 +43,15 @@ const addTenant = (async (req, res) => {
             appartementType: req.body.appartementType
         }
 
-        const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
-        landlord.listOfTenants.set(number, locataire)
-        await landlord.save();
+        const landlord = await Landlord.findOne({ landlordNumber: req.body.landlordNumber });
+        const propriety = await Landlord.findOne({ proprietyId: req.body.landlordNumber+'-'+req.body.proprietyName });
+        console.log(landlord);
+        console.log(propriety);
+        /* landlord.listOfTenants.set(number, locataire)
+        await landlord.save(); */
 
         res.status(200).json({ message: 'Élément ajouté avec succès' });
-        console.log(landlord.listOfTenants);
+        //console.log(landlord.listOfTenants);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Erreur lors de l\'ajout de l\'élément' });
@@ -212,42 +214,9 @@ const getPhotoProfil = (async (req, res) => {
     }
 });
 
-const getLandlordProprietiesImages = (async (req, res) => {
+const getLandlordProprieties = (async (req, res) => {
     try {
-        const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
-        if (!landlord) {
-            return res.status(404).send('user not find.');
-        }
-
-        const proprieties = landlord.listOfProprieties
-        if (!proprieties) {
-            return res.status(404).send('no proprieties images find')
-        }
-
-        const proprietiesImages = await Promise.all(proprieties.map(async (proprietyId) => {
-            const propriety = await Propriety.findOne({ proprietyName: proprietyId });
-            const fileExtension = path.extname(propriety.proprietyImages.imagePath).slice(1);
-            const mimeType = mimeTypes.lookup(fileExtension) || 'application/octet-stream';
-            res.set('Content-Type', mimeType);
-            return propriety.proprietyImages.data
-        }));
-
-        // Utilisez l'extension du fichier pour déterminer le type MIME
-        /* const fileExtension = path.extname(propriety.ProprietyImages.imagePath).slice(1);
-        const mimeType = mimeTypes.lookup(fileExtension) || 'application/octet-stream';
-
-        res.set('Content-Type', mimeType); */ // Assurez-vous de définir le type MIME approprié
-        console.log(proprietiesImages);
-        res.send(proprietiesImages[2]);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Erreur lors de la récupération de l\'image.');
-    }
-});
-
-const getLandlordProprietiesInfo = (async (req, res) => {
-    try {
-        const landlord = await Landlord.findOne({ landlordNumber: req.params.landlordNumber });
+        const landlord = await Landlord.findById(req.params.id);
         if (!landlord) {
             return res.status(404).send('user not find.');
         }
@@ -258,19 +227,15 @@ const getLandlordProprietiesInfo = (async (req, res) => {
         }
 
         const proprietiesInfo = await Promise.all(proprieties.map(async (proprietyId) => {
-            const propriety = await Propriety.findOne({ proprietyName: proprietyId });
-            return {
-                proprietyName: propriety.proprietyName,
-                proprietyAdress: propriety.proprietyAdress,
-                proprietyType: propriety.proprietyType
-            }
+            const propriety = await Propriety.findOne({ proprietyId: proprietyId });
+            return propriety
         }));
 
         console.log(proprietiesInfo);
         res.send(proprietiesInfo)
     } catch (error) {
         console.error(error);
-        res.status(500).send('Erreur lors de la récupération de l\'image.');
+        res.status(500).send('Erreur lors de la récupération des infos');
     }
 })
 
@@ -309,6 +274,7 @@ const updateProfilImage = (async (req, res) => {
                 if (!user) {
                     return res.status(500).json({ message: "user n'existe pas" })
                 }
+                console.log(req.file);
                 user.profilImage = req.file.location
                 await user.save();
                 res.send(user)
@@ -438,5 +404,5 @@ const signinLandlord = (async (req, res) => {
         })
 })
 
-export { addTenant, confirmLandlordPassword, deleteLandlord, getLandlord, getLandlordProprietiesImages, getLandlordProprietiesInfo, getLandlords, getPhotoProfil, sendAuthOTP, signinLandlord, signupLandlord, updateLandlordPassword, updateProfil, updateProfilImage, verifyAuthOTP };
+export { addTenant, confirmLandlordPassword, deleteLandlord, getLandlord, getLandlordProprieties, getLandlords, getPhotoProfil, sendAuthOTP, signinLandlord, signupLandlord, updateLandlordPassword, updateProfil, updateProfilImage, verifyAuthOTP };
 

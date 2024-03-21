@@ -6,8 +6,7 @@ import {
     confirmLandlordPassword,
     deleteLandlord,
     getLandlord,
-    getLandlordProprietiesImages,
-    getLandlordProprietiesInfo,
+    getLandlordProprieties,
     getLandlords,
     getPhotoProfil,
     sendAuthOTP,
@@ -24,8 +23,7 @@ import { authMiddleware } from '../controllers/middleware/authMiddleware.js';
 routerLandlord.get('/',authMiddleware, getLandlords)
 routerLandlord.get('/:landlordNumber',authMiddleware, getLandlord)
 routerLandlord.get('/photo-profil/:landlordNumber', getPhotoProfil)
-routerLandlord.get('/proprieties/infos/:landlordNumber', getLandlordProprietiesInfo)
-routerLandlord.get('/proprieties/image/:landlordNumber', getLandlordProprietiesImages)
+routerLandlord.get('/proprieties/:id', getLandlordProprieties)
 
 
 routerLandlord.post('/signup', signupLandlord)

@@ -6,6 +6,10 @@ import Landlord from "../../models/Proprietaire.js";
 
 dotenv.config({ path: './../../config/.env' })
 
+var limits = {
+    files:2,
+    fileSize: 1024 * 1024 * 10
+}
 const spacesEndpoint = new aws.Endpoint('ams3.digitaloceanspaces.com'); // Mettez à jour avec la région de votre Space
 const s3 = new aws.S3({
     endpoint: spacesEndpoint,
@@ -31,7 +35,8 @@ const upload = (fieldName, bucketName) => multer({
             })
             
         }
-    })
+    }),
+    limits:limits,
 }).single(fieldName);
 
 const uploadFieldName = (bucketName) => multer({
