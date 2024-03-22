@@ -23,9 +23,8 @@ const Landlord = mongoose.model('landlords', {
     },
     identity: String,
     listOfTenants: {
-        type: Map,
-        of:Map,
-        default: {}
+        type: [Map],
+        default: []
     },
     listOfProprieties: {
         type: [String],

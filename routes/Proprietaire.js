@@ -32,7 +32,7 @@ routerLandlord.post('/confirm/password/:landlordNumber',authMiddleware, confirmL
 routerLandlord.post('/otp/send',sendAuthOTP)
 routerLandlord.post('/otp/verify', verifyAuthOTP)
 
-routerLandlord.put('/add-tenant/:landlordNumber',authMiddleware, addTenant)
+routerLandlord.put('/add-tenant', addTenant)
 /* routerLandlord.put('/:_id',authMiddleware, updateLandlordNumber) */
 routerLandlord.put(('/update-password/:landlordNumber'),authMiddleware, updateLandlordPassword)
 routerLandlord.put(('/update-profil'), updateProfil)

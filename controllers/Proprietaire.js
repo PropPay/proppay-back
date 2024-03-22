@@ -33,22 +33,30 @@ let codeTimestamps = {};
 
 const addTenant = (async (req, res) => {
     try {
-        const number = req.body.tenantNumber
         const locataire = {
-            ProprietyName: req.body.ProprietyName,
+            tenantNumber: req.body.tenantNumber,
+            proprietyName: req.body.proprietyName,
             tenantFirstname: req.body.tenantFirstname,
             tenantLastname: req.body.tenantLastname,
             appartementNumber: req.body.appartementNumber,
             tenantRent: req.body.tenantRent,
             appartementType: req.body.appartementType
         }
+ 
+        const landlord = await Landlord.findOne({ landlordNumber: req.body.landlordNumber});
+        const propriety = await Propriety.findOne({ proprietyId: req.body.landlordNumber+'-'+req.body.proprietyName });
+        
+        landlord.listOfTenants.push(locataire)
+        await landlord.save();
 
-        const landlord = await Landlord.findOne({ landlordNumber: req.body.landlordNumber });
-        const propriety = await Landlord.findOne({ proprietyId: req.body.landlordNumber+'-'+req.body.proprietyName });
+        propriety.listOfTenants.push(locataire);
+        propriety.occupiedUnits = parseInt(propriety.occupiedUnits) + 1
+        propriety.availableUnits = parseInt(propriety.availableUnits) - 1
+        await propriety.save();
+
         console.log(landlord);
+        console.log('---------------------------------------------');
         console.log(propriety);
-        /* landlord.listOfTenants.set(number, locataire)
-        await landlord.save(); */
 
         res.status(200).json({ message: 'Élément ajouté avec succès' });
         //console.log(landlord.listOfTenants);

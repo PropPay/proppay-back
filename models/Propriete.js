@@ -21,7 +21,14 @@ const Propriety = mongoose.model('proprietes', {
         type: String,
         /* required: [true, "'Is a propriety' occupied is requiried"] */
     },
-    proofOfPropriety: String
+    proofOfPropriety: String,
+    totalUnits: String,
+    occupiedUnits: String,
+    availableUnits: String,
+    listOfTenants: {
+        type: [Map],
+        default: []
+    },
 });
 
 export default Propriety ;

@@ -38,18 +38,17 @@ const upload = (fieldName, bucketName) => multer({
         acl: 'public-read',
         key: async function (req, file, cb) {
             console.log(req.body);
-            await Landlord.findOne({ landlordNumber: req.body.landlordNumber })
-            .then(async user => {
-                console.log(user);
-                if (!user) {
-                    console.log("user n'existe pas");
-                }
+            const user = await Landlord.findOne({ landlordNumber: req.body.landlordNumber });
+            console.log(user);
+            if (!user) {
+                console.log("user n'existe pas");
+                return cb(new Error("user n'existe pas"));
+            } else {
                 cb(null, Date.now().toString() + '-' + file.originalname);
-            })
-            
+            }
         }
     }),
-    limits:limits,
+
 }).single(fieldName);
 
 const uploadFieldName = (bucketName) => multer({
