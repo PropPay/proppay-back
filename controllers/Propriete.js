@@ -27,7 +27,10 @@ const addPropriety = (async (req, res) => {
                 proprietyType: req.body.proprietyType,
                 proprietyImages: proprietyImages,
                 proprietyOccupation: req.body.proprietyOccupation,
-                proofOfPropriety: proofOfPropriety
+                proofOfPropriety: proofOfPropriety,
+                totalUnits: req.body.totalUnits,
+                occupiedUnits: req.body.occupiedUnits,
+                availableUnits: req.body.availableUnits
             })
             await propriety.save()
             console.log(propriety);
@@ -68,21 +71,18 @@ const deletePropriety = (async (req, res) => {
         const propriety = await Propriety.findById(req.params.id);
     const elt = propriety.proprietyId;
     const landlord = await Landlord.findOne({ landlordNumber: propriety.proprietyId.substr(0, 14) });
-    const proprieties = landlord.listOfProprieties
-    if (!proprieties) {
-        return res.status(404).send('no proprieties find')
+    if (!landlord) {
+        return res.status(404).send('no user find')
     }
-    console.log(proprieties);
-    console.log("*********************************************************");
+    const proprieties = landlord.listOfProprieties
     const newProprieties = proprieties.filter(proprietyId => proprietyId !== elt);
     landlord.listOfProprieties = newProprieties;
     await landlord.save();
     await Propriety.deleteOne({ _id: propriety._id.toString() })
-    console.log(newProprieties);
     res.send("Propriety correctly removed")
     } catch (error) {
         console.log("error :"+error);
-        console.log("Propriety correctly removed");
+        res.send("Propriety not correctly removed" + error);
     }
 })
 
