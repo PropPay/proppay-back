@@ -32,11 +32,11 @@ routerLandlord.post('/confirm/password/:landlordNumber',authMiddleware, confirmL
 routerLandlord.post('/otp/send',sendAuthOTP)
 routerLandlord.post('/otp/verify', verifyAuthOTP)
 
-routerLandlord.put('/add-tenant', addTenant)
+routerLandlord.put('/add-tenant',authMiddleware, addTenant)
 /* routerLandlord.put('/:_id',authMiddleware, updateLandlordNumber) */
 routerLandlord.put(('/update-password/:landlordNumber'),authMiddleware, updateLandlordPassword)
-routerLandlord.put(('/update-profil'), updateProfil)
-routerLandlord.put(('/photo-profil'), updateProfilImage)
+routerLandlord.put(('/update-profil'),authMiddleware, updateProfil)
+routerLandlord.put(('/photo-profil'),authMiddleware, updateProfilImage)
 
 routerLandlord.delete('/:landlordNumber',authMiddleware, deleteLandlord)
 

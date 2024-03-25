@@ -28,7 +28,7 @@ connectDb();
 app.use('/',routerImage)
 app.use('/users/tenants', routerTenant)
 app.use('/users/landlords', routerLandlord)
-app.use('/proprieties', routerPropriety)
+app.use('/proprieties',authMiddleware, routerPropriety)
 app.use('/notifications', authMiddleware, routerNotification)
 
 app.listen(3000, (err) => {

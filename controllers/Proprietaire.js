@@ -13,7 +13,7 @@ let otpSend = "";
 // Fonction pour créer un jeton JWT
 const createToken = (userId) => {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
-        expiresIn: "24h", // Durée de validité du token
+        expiresIn: "720h", // Durée de validité du token
     });
 };
 
@@ -42,10 +42,10 @@ const addTenant = (async (req, res) => {
             tenantRent: req.body.tenantRent,
             appartementType: req.body.appartementType
         }
- 
-        const landlord = await Landlord.findOne({ landlordNumber: req.body.landlordNumber});
-        const propriety = await Propriety.findOne({ proprietyId: req.body.landlordNumber+'-'+req.body.proprietyName });
-        
+
+        const landlord = await Landlord.findOne({ landlordNumber: req.body.landlordNumber });
+        const propriety = await Propriety.findOne({ proprietyId: req.body.landlordNumber + '-' + req.body.proprietyName });
+
         landlord.listOfTenants.push(locataire)
         await landlord.save();
 
@@ -249,22 +249,22 @@ const getLandlordProprieties = (async (req, res) => {
 
 const updateProfil = (async (req, res) => {
     try {
-        await upload('identity','landlords/pieces')(req, res, async function (error) {
+        await upload('identity', 'landlords/pieces')(req, res, async function (error) {
             if (error) {
                 console.log(error);
             }
             await Landlord.findOne({ landlordNumber: req.body.landlordNumber })
-            .then(async user => {
-                if (!user) {
-                    return res.status(500).json({ message: "user n'existe pas" })
-                }
-                user.landlordFirstname = req.body.landlordFirstname,
-                user.landlordLastname = req.body.landlordLastname,
-                user.landlordAdress = req.body.landlordAdress,
-                user.identity = req.file.location
-                await user.save();
-                res.send(user)
-            })
+                .then(async user => {
+                    if (!user) {
+                        return res.status(500).json({ message: "user n'existe pas" })
+                    }
+                    user.landlordFirstname = req.body.landlordFirstname,
+                        user.landlordLastname = req.body.landlordLastname,
+                        user.landlordAdress = req.body.landlordAdress,
+                        user.identity = req.file.location
+                    await user.save();
+                    res.send(user)
+                })
         })
     } catch (error) {
         console.log(error);
@@ -273,20 +273,20 @@ const updateProfil = (async (req, res) => {
 
 const updateProfilImage = (async (req, res) => {
     try {
-        await upload('profile','photos de profil')(req, res, async function (error) {
+        await upload('profile', 'photos de profil')(req, res, async function (error) {
             if (error) {
                 console.log(error);
             }
             await Landlord.findOne({ landlordNumber: req.body.landlordNumber })
-            .then(async user => {
-                if (!user) {
-                    return res.status(500).json({ message: "user n'existe pas" })
-                }
-                console.log(req.file);
-                user.profilImage = req.file.location
-                await user.save();
-                res.send(user)
-            })
+                .then(async user => {
+                    if (!user) {
+                        return res.status(500).json({ message: "user n'existe pas" })
+                    }
+                    console.log(req.file);
+                    user.profilImage = req.file.location
+                    await user.save();
+                    res.send(user)
+                })
         })
     } catch (error) {
         console.log(error);
